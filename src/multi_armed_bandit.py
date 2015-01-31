@@ -14,9 +14,11 @@ class BanditAlgorithm(object):
         self.successes = zeros(shape=(num_bandits,), dtype=int)
         self.num_bandits = num_bandits
         self.prior = (1.0,1.0)
+        self.N = 0
 
     def update(self, trial, success):
         self.trials[trial] = self.trials[trial] + 1
+        self.N += 1
         if (success):
             self.successes[trial] = self.successes[trial] + 1
 
@@ -34,13 +36,29 @@ class BayesianBandit( BanditAlgorithm ):
         # Return the index of the sample with the largest value
         return sampled_theta.index( max(sampled_theta) ) 
 
-# Experiment 1: Bayesian Bandit vs. UCB1 
-# Chart # successes over time for iterations 1...1000
-# Two bandits, 0.3, 0.4
+class UCB1( BanditAlgorithm ):
+    def sample(self):
+        if (self.N < self.num_bandits):
+            return self.N;
+        mean_upper_bound = []
+        for i in range(self.num_bandits):
+            mean_upper_bound += [self.successes[i] / float(self.trials[i]) + sqrt( 2*log(self.N) / self.trials[i]) ]
+        return mean_upper_bound.index( max(mean_upper_bound) ) 
+
 def run_experiment(bandit, slots):
     n = 1000
     for i in range(n):
         next_bandit = bandit.sample()
         result = slots[next_bandit].pull()
-        bandit.update(next, result)
-    print bandit.trials
+        bandit.update(next_bandit, result)
+
+def compare_algs(slots):
+    print slots
+
+    bb = BayesianBandit(num_bandits = len(slots))
+    run_experiment(bb, slots)
+    print "\tbayesian bandit: ", bb.trials
+
+    ucb1 = UCB1(num_bandits = len(slots))
+    run_experiment(ucb1, slots)
+    print "\tUCB1: ", ucb1.trials
