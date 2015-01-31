@@ -20,11 +20,11 @@ class BanditAlgorithm(object):
         if (success):
             self.successes[trial] = self.successes[trial] + 1
 
-    def pick_bandit(self):
+    def sample(self):
         raise NotImplementedError( "Need to implement a bandit algorithm" )
   
 class BayesianBandit( BanditAlgorithm ): 
-    def pick_bandit(self):
+    def sample(self):
         sampled_theta = []
         for i in range(self.num_bandits):
             #Construct beta distribution for posterior
@@ -40,7 +40,7 @@ class BayesianBandit( BanditAlgorithm ):
 def run_experiment(bandit, slots):
     n = 1000
     for i in range(n):
-        next = bandit.pick_bandit()
-        pull = slots[next].pull()
-        bandit.update(next, pull)
+        next_bandit = bandit.sample()
+        result = slots[next_bandit].pull()
+        bandit.update(next, result)
     print bandit.trials

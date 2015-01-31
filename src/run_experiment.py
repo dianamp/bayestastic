@@ -1,7 +1,5 @@
 from multi_armed_bandit import *
 
-
-
 slots = [Bandit(0.3), Bandit(0.4)]
 bandit = BayesianBandit()
 run_experiment(bandit, slots)
