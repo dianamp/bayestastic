@@ -1,6 +1,5 @@
 from numpy import *
-from scipy.stats import beta
-from scipy.stats import bernoulli
+from scipy.stats import beta,bernoulli
 
 class Bandit(object):
     def __init__(self,p):
@@ -27,7 +26,7 @@ class BanditAlgorithm(object):
 class BayesianBandit( BanditAlgorithm ): 
     def pick_bandit(self):
         sampled_theta = []
-        for i in range(self.num_options):
+        for i in range(self.num_bandits):
             #Construct beta distribution for posterior
             dist = beta(self.prior[0]+self.successes[i],
                         self.prior[1]+self.trials[i]-self.successes[i])
@@ -41,7 +40,7 @@ class BayesianBandit( BanditAlgorithm ):
 def run_experiment(bandit, slots):
     n = 1000
     for i in range(n):
-        next = bandit.get_recommendation()
+        next = bandit.pick_bandit()
         pull = slots[next].pull()
-        bandit.add_result(i, pull)
+        bandit.update(next, pull)
     print bandit.trials
